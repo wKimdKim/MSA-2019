@@ -1,0 +1,123 @@
+import * as React from "react";
+import ReactDropzone from "react-dropzone";
+
+import { Component } from "react";
+import "./DropArea.css";
+
+interface IDropAreaProps {
+  setResults: any;
+}
+
+interface IDropAreaState {
+  imageFiles: any[];
+  dropzone: any;
+  picLoaded: boolean;
+}
+
+class DropArea extends Component<IDropAreaProps, IDropAreaState> {
+  constructor(props: IDropAreaProps) {
+    super(props);
+    this.state = {
+      dropzone: this.onDrop.bind(this),
+      imageFiles: [],
+      picLoaded: false
+    };
+  }
+  public onDrop(files: any) {
+    this.setState({ imageFiles: files });
+    this.props.setResults("", this.state.imageFiles.length);
+    const file = files[0];
+    const reader = new FileReader();
+    reader.onload = event => {
+      const binaryString = (event.target as FileReader).result;
+      if (typeof binaryString === "string") {
+        this.upload(btoa(binaryString));
+      }
+    };
+    try {
+      reader.readAsBinaryString(file);
+      this.setState({ picLoaded: true });
+    } catch (error) {
+      this.props.setResults(
+        "Sorry we had trouble loading that file please use a download image file",
+        0
+      );
+    }
+  }
+  public upload(base64String: any) {
+    const base64 = require("base64-js");
+    const byteArray = base64.toByteArray(base64String);
+    fetch("https://whatsmyage.azurewebsites.net/image", {
+      body: byteArray,
+      headers: {
+        "Content-Type": "application/octet-stream"
+      },
+      method: "POST"
+    }).then((response: any) => {
+      if (!response.ok) {
+        this.props.setResults(
+          "Sorry there was an error",
+          this.state.imageFiles.length
+        );
+      } else {
+        response.json().then((json: any[]) => {
+          if (json.length < 1) {
+            this.props.setResults(
+              "Sorry no face detected",
+              this.state.imageFiles.length
+            );
+          } else {
+            this.props.setResults(
+              `Age is ${json[0].faceAttributes.age}`,
+              this.state.imageFiles.length
+            );
+          }
+        });
+      }
+    });
+  }
+  public render() {
+    const styles = {
+      borderColor: "white"
+    };
+    if (this.state.picLoaded) {
+      styles.borderColor = "#447FEC";
+    }
+
+    const borderColor = styles;
+    return (
+      <div className="dropContainer">
+        <div className="centreText">
+          <div style={borderColor} className="dropZone">
+            <ReactDropzone
+              accept="image/*"
+              onDrop={this.state.dropzone}
+              style={{ position: "relative" }}
+            >
+              <div className="dropZoneText">
+                {this.state.imageFiles.length > 0 ? (
+                  <div>
+                    {this.state.imageFiles.map(file => (
+                      <img
+                        className="image1"
+                        key={file.name}
+                        src={file.preview}
+                      />
+                    ))}
+                  </div>
+                ) : (
+                  <p>
+                    Try dropping some files here, or click to select files to
+                    upload.
+                  </p>
+                )}
+              </div>
+            </ReactDropzone>
+          </div>
+        </div>
+      </div>
+    );
+  }
+}
+
+export default DropArea;

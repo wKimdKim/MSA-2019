@@ -1,0 +1,6 @@
+.app-container {
+  height: 100%;
+  min-height: 100vh;
+  background-color: rgb(68, 127, 236);
+  clip-path: polygon(100% 0, 100% 80%, 84% 100%, 0 100%, 0 0);
+}

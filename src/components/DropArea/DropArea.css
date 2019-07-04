@@ -1,0 +1,29 @@
+.centreText {
+  text-align: center;
+}
+
+.dropZone {
+  margin: 20px 5% 0 5%;
+  padding: 5px 0 0 0;
+  background-color: rgb(68, 127, 236);
+  border-style: solid;
+  border-radius: 20px;
+}
+
+.image1 {
+  max-width: 100%;
+  height: 50vh;
+}
+
+.dropZoneText {
+  display: flex;
+  justify-content: center;
+  flex-direction: column;
+  text-align: center;
+  color: black;
+}
+
+.dropZoneText:hover {
+  text-decoration: underline;
+  color: gray;
+}
